@@ -107,7 +107,16 @@ func (s *Server) serve() error {
 		cli.Numero = i
 		Logger.Printf("Connection client [%d] from %s accepted", cli.Numero, cli.rwc.RemoteAddr().String())
 		s.wg.Add(1)
-		go cli.serve()
+
+		go func() {
+			defer func() {
+				if err := recover(); err != nil {
+					Logger.Printf("Client panic recovered: %v", err)
+				}
+			}()
+
+			cli.serve()
+		}()
 	}
 
 	return nil
